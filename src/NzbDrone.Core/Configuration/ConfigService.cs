@@ -267,6 +267,13 @@ namespace NzbDrone.Core.Configuration
             set { SetValue("EnableMediaInfo", value); }
         }
 
+        public bool VerifyCustomFormatsWithMediaInfo
+        {
+            get { return GetValueBoolean("VerifyCustomFormatsWithMediaInfo", true); }
+
+            set { SetValue("VerifyCustomFormatsWithMediaInfo", value); }
+        }
+
         public bool UseScriptImport
         {
             get { return GetValueBoolean("UseScriptImport", false); }

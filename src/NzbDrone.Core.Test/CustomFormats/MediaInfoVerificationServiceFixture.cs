@@ -4,6 +4,7 @@ using FizzWare.NBuilder;
 using Moq;
 using NUnit.Framework;
 using NzbDrone.Core.Blocklisting;
+using NzbDrone.Core.Configuration;
 using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.Download;
 using NzbDrone.Core.History;
@@ -63,6 +64,10 @@ namespace NzbDrone.Core.Test.CustomFormats
             Mocker.GetMock<IHistoryService>()
                 .Setup(s => s.FindByDownloadId("abc"))
                 .Returns(new List<MovieHistory> { _grabbed });
+
+            Mocker.GetMock<IConfigService>()
+                .SetupGet(s => s.VerifyCustomFormatsWithMediaInfo)
+                .Returns(true);
         }
 
         private void GivenImportedFileFormats(params CustomFormat[] formats)
@@ -130,6 +135,23 @@ namespace NzbDrone.Core.Test.CustomFormats
 
             Mocker.GetMock<IBlocklistService>()
                 .Verify(s => s.Block(It.IsAny<MovieHistory>(), It.IsAny<string>()), Times.Never());
+        }
+
+        [Test]
+        public void should_do_nothing_when_verification_is_disabled()
+        {
+            Mocker.GetMock<IConfigService>()
+                .SetupGet(s => s.VerifyCustomFormatsWithMediaInfo)
+                .Returns(false);
+
+            GivenImportedFileFormats();
+
+            Subject.HandleAsync(GivenImportEvent());
+
+            Mocker.GetMock<IBlocklistService>()
+                .Verify(s => s.Block(It.IsAny<MovieHistory>(), It.IsAny<string>()), Times.Never());
+            Mocker.GetMock<IManageCommandQueue>()
+                .Verify(s => s.Push(It.IsAny<MoviesSearchCommand>(), It.IsAny<CommandPriority>(), It.IsAny<CommandTrigger>()), Times.Never());
         }
 
         [Test]

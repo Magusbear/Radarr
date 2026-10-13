@@ -5,6 +5,7 @@ using System.Linq;
 using NLog;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Blocklisting;
+using NzbDrone.Core.Configuration;
 using NzbDrone.Core.History;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.MediaFiles.MediaInfo;
@@ -27,11 +28,13 @@ namespace NzbDrone.Core.CustomFormats
     public class CustomFormatCalculationService : ICustomFormatCalculationService
     {
         private readonly ICustomFormatService _formatService;
+        private readonly IConfigService _configService;
         private readonly Logger _logger;
 
-        public CustomFormatCalculationService(ICustomFormatService formatService, Logger logger)
+        public CustomFormatCalculationService(ICustomFormatService formatService, IConfigService configService, Logger logger)
         {
             _formatService = formatService;
+            _configService = configService;
             _logger = logger;
         }
 
@@ -221,6 +224,11 @@ namespace NzbDrone.Core.CustomFormats
 
         private string VerifyReleaseTitle(string releaseTitle, MediaInfoModel mediaInfo, string releaseGroup)
         {
+            if (!_configService.VerifyCustomFormatsWithMediaInfo)
+            {
+                return releaseTitle;
+            }
+
             var verifiedTitle = VerifiedReleaseTitleBuilder.Build(releaseTitle, mediaInfo, releaseGroup);
 
             if (verifiedTitle != releaseTitle)

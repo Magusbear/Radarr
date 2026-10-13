@@ -10616,6 +10616,9 @@
           },
           "enableMediaInfo": {
             "type": "boolean"
+          },
+          "verifyCustomFormatsWithMediaInfo": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false

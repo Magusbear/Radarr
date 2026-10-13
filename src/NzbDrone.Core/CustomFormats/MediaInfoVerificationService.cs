@@ -3,6 +3,7 @@ using System.Linq;
 using NLog;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Blocklisting;
+using NzbDrone.Core.Configuration;
 using NzbDrone.Core.History;
 using NzbDrone.Core.IndexerSearch;
 using NzbDrone.Core.MediaFiles.Events;
@@ -17,18 +18,21 @@ namespace NzbDrone.Core.CustomFormats
     public class MediaInfoVerificationService : IHandleAsync<MovieFileImportedEvent>
     {
         private readonly ICustomFormatCalculationService _formatCalculator;
+        private readonly IConfigService _configService;
         private readonly IHistoryService _historyService;
         private readonly IBlocklistService _blocklistService;
         private readonly IManageCommandQueue _commandQueueManager;
         private readonly Logger _logger;
 
         public MediaInfoVerificationService(ICustomFormatCalculationService formatCalculator,
+                                            IConfigService configService,
                                             IHistoryService historyService,
                                             IBlocklistService blocklistService,
                                             IManageCommandQueue commandQueueManager,
                                             Logger logger)
         {
             _formatCalculator = formatCalculator;
+            _configService = configService;
             _historyService = historyService;
             _blocklistService = blocklistService;
             _commandQueueManager = commandQueueManager;
@@ -40,7 +44,7 @@ namespace NzbDrone.Core.CustomFormats
             var localMovie = message.MovieInfo;
             var movie = localMovie.Movie;
 
-            if (!message.NewDownload || message.DownloadId.IsNullOrWhiteSpace() || localMovie.MediaInfo == null || movie?.QualityProfile == null)
+            if (!_configService.VerifyCustomFormatsWithMediaInfo || !message.NewDownload || message.DownloadId.IsNullOrWhiteSpace() || localMovie.MediaInfo == null || movie?.QualityProfile == null)
             {
                 return;
             }

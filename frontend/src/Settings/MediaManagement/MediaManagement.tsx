@@ -388,6 +388,22 @@ function MediaManagement() {
                 />
               </FormGroup>
 
+              <FormGroup size={sizes.MEDIUM}>
+                <FormLabel>
+                  {translate('VerifyCustomFormatsWithMediaInfo')}
+                </FormLabel>
+
+                <FormInputGroup
+                  type={inputTypes.CHECK}
+                  name="verifyCustomFormatsWithMediaInfo"
+                  helpText={translate(
+                    'VerifyCustomFormatsWithMediaInfoHelpText'
+                  )}
+                  onChange={handleInputChange}
+                  {...settings.verifyCustomFormatsWithMediaInfo}
+                />
+              </FormGroup>
+
               <FormGroup
                 advancedSettings={showAdvancedSettings}
                 isAdvanced={true}

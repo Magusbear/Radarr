@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using FluentAssertions;
 using NUnit.Framework;
+using NzbDrone.Core.Configuration;
 using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.MediaFiles.MediaInfo;
@@ -25,6 +26,10 @@ namespace NzbDrone.Core.Test.CustomFormats
             Mocker.GetMock<ICustomFormatService>()
                 .Setup(s => s.All())
                 .Returns(new List<CustomFormat> { _dolbyVision });
+
+            Mocker.GetMock<IConfigService>()
+                .SetupGet(s => s.VerifyCustomFormatsWithMediaInfo)
+                .Returns(true);
 
             _movie = new Movie();
 
@@ -68,6 +73,18 @@ namespace NzbDrone.Core.Test.CustomFormats
             GivenMediaInfo(HdrFormat.Hdr10);
 
             Subject.ParseCustomFormat(_movieFile, _movie).Should().NotContain(_dolbyVision);
+        }
+
+        [Test]
+        public void should_match_release_title_format_from_name_when_verification_is_disabled()
+        {
+            GivenMediaInfo(HdrFormat.Hdr10);
+
+            Mocker.GetMock<IConfigService>()
+                .SetupGet(s => s.VerifyCustomFormatsWithMediaInfo)
+                .Returns(false);
+
+            Subject.ParseCustomFormat(_movieFile, _movie).Should().Contain(_dolbyVision);
         }
     }
 }

@@ -2031,6 +2031,8 @@
   "UsenetDisabled": "Usenet Disabled",
   "UserInvokedSearch": "User Invoked Search",
   "Username": "Username",
+  "VerifyCustomFormatsWithMediaInfo": "Verify Custom Formats with Media Info",
+  "VerifyCustomFormatsWithMediaInfoHelpText": "Score Release Title custom formats of downloaded files using the HDR, codec, bit depth and audio information read from the file instead of the release name. If a download scores lower than when it was grabbed, the release is blocklisted and a new search is started. Requires the file to be analyzed.",
   "Version": "Version",
   "VideoCodec": "Video Codec",
   "VideoDynamicRange": "Video Dynamic Range",

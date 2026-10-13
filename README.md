@@ -11,6 +11,36 @@
 Radarr is a movie collection manager for Usenet and BitTorrent users. It can monitor multiple RSS feeds for new movies and will interface with clients and indexers to grab, sort, and rename them. It can also be configured to automatically upgrade the quality of existing files in the library when a better quality format becomes available.
 Note that only one type of a given movie is supported. If you want both a 4k version and 1080p version of a given movie you will need multiple instances.
 
+## About This Fork
+
+This is a fork of [Radarr/Radarr](https://github.com/Radarr/Radarr) with the additional features listed below. Everything else works like upstream Radarr.
+
+### Fork Features
+
+#### Custom formats verified with media info
+
+Upstream Radarr scores custom formats only from the release name, so a release called `...DV.HDR10.Atmos...` gets the Dolby Vision and Atmos scores even if the file has neither. This fork re-checks downloaded files with ffprobe:
+
+* **Verified scoring of files:** For downloaded and existing files, technical tags in the release name (HDR / Dolby Vision / HDR10+ / HLG, video codec, bit depth, audio codec, audio channels, 3D) are replaced with what ffprobe actually found in the file before *Release Title* custom format conditions are evaluated. Your existing custom formats (e.g. from the TRaSH guides) keep working without changes.
+  * Example: `Movie.2023.2160p.WEB-DL.DV.HDR10.DDP5.1.Atmos.H.265-GRP` that really contains HDR10 and plain DD+ 5.1 is scored as `Movie.2023.2160p.WEB-DL.HDR10.h265.HEVC.10bit.DDP.EAC3.5.1-GRP`, so it no longer matches DV or Atmos formats.
+* **Mislabeled releases are replaced:** After an import, the file's verified score is compared with the score the release had when it was grabbed. If it dropped, the release is added to the blocklist (with the reason) and, if the movie is monitored and upgrades are allowed, a new search is started.
+* **Upgrades use the real score:** Because existing files are scored with verified information, files whose names overstated their quality become eligible for upgrades through normal RSS sync and searches.
+* **Setting:** *Settings → Media Management → Verify Custom Formats with Media Info* (on by default). Turning it off restores upstream behaviour.
+* **Limitations:** Only applies once a file has been analyzed by ffprobe; release names are still used before download. Only the first audio track is checked. Tokens that are part of the movie title (before the year) are never changed.
+* **Troubleshooting:** With trace logging, `Using media info verified release title: <name> -> <verified name>` shows the rewritten name. Blocklisted releases show the reason `Custom format score dropped from X to Y after media info verification`.
+
+#### Docker image
+
+A multi-arch (amd64, arm64) Alpine image is published to `ghcr.io/magusbear/radarr` by the manually triggered *Publish Docker image* GitHub Action (Actions → Publish Docker image → Run workflow).
+
+```
+docker run -d -p 7878:7878 -v /path/to/config:/config -v /path/to/movies:/movies ghcr.io/magusbear/radarr:latest
+```
+
+* Runs as UID/GID 1000 (override with `--user <uid>:<gid>`); data is stored in `/config`.
+* Updates are done by pulling a new image; Radarr's built-in updater is disabled.
+* Tags: `latest`, the version (e.g. `10.0.0.6`) and `sha-<commit>`.
+
 ## Major Features Include
 
 * Adding new movies with lots of information, such as trailers, ratings, etc.

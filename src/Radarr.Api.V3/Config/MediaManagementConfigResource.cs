@@ -30,6 +30,7 @@ namespace Radarr.Api.V3.Config
         public bool ImportExtraFiles { get; set; }
         public string ExtraFileExtensions { get; set; }
         public bool EnableMediaInfo { get; set; }
+        public bool VerifyCustomFormatsWithMediaInfo { get; set; }
     }
 
     public static class MediaManagementConfigResourceMapper
@@ -59,7 +60,8 @@ namespace Radarr.Api.V3.Config
                 ScriptImportPath = model.ScriptImportPath,
                 ImportExtraFiles = model.ImportExtraFiles,
                 ExtraFileExtensions = model.ExtraFileExtensions,
-                EnableMediaInfo = model.EnableMediaInfo
+                EnableMediaInfo = model.EnableMediaInfo,
+                VerifyCustomFormatsWithMediaInfo = model.VerifyCustomFormatsWithMediaInfo
             };
         }
     }
