@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Datastore;
 using NzbDrone.Core.Download;
+using NzbDrone.Core.History;
 using NzbDrone.Core.Indexers;
 using NzbDrone.Core.Messaging.Commands;
 using NzbDrone.Core.Messaging.Events;
@@ -20,6 +22,7 @@ namespace NzbDrone.Core.Blocklisting
         PagingSpec<Blocklist> Paged(PagingSpec<Blocklist> pagingSpec);
         List<Blocklist> GetByMovieId(int movieId);
         void Block(RemoteMovie remoteMovie, string message);
+        void Block(MovieHistory grabbedHistory, string message);
         void Delete(int id);
         void Delete(List<int> ids);
     }
@@ -98,6 +101,37 @@ namespace NzbDrone.Core.Blocklisting
             if (remoteMovie.Release is TorrentInfo torrentRelease)
             {
                 blocklist.TorrentInfoHash = torrentRelease.InfoHash;
+            }
+
+            _blocklistRepository.Insert(blocklist);
+        }
+
+        public void Block(MovieHistory grabbedHistory, string message)
+        {
+            var protocol = (DownloadProtocol)Convert.ToInt32(grabbedHistory.Data.GetValueOrDefault("protocol", "0"));
+
+            var blocklist = new Blocklist
+            {
+                MovieId = grabbedHistory.MovieId,
+                SourceTitle = grabbedHistory.SourceTitle,
+                Quality = grabbedHistory.Quality,
+                Date = DateTime.UtcNow,
+                Size = long.Parse(grabbedHistory.Data.GetValueOrDefault("size", "0")),
+                Indexer = grabbedHistory.Data.GetValueOrDefault("indexer"),
+                Protocol = protocol,
+                Message = message,
+                Languages = grabbedHistory.Languages,
+                TorrentInfoHash = protocol == DownloadProtocol.Torrent ? grabbedHistory.DownloadId : null
+            };
+
+            if (DateTime.TryParse(grabbedHistory.Data.GetValueOrDefault("publishedDate"), CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal, out var publishedDate))
+            {
+                blocklist.PublishedDate = publishedDate;
+            }
+
+            if (Enum.TryParse(grabbedHistory.Data.GetValueOrDefault("indexerFlags"), true, out IndexerFlags flags))
+            {
+                blocklist.IndexerFlags = flags;
             }
 
             _blocklistRepository.Insert(blocklist);

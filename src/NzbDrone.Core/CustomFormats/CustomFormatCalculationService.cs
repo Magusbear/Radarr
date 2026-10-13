@@ -7,6 +7,7 @@ using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Blocklisting;
 using NzbDrone.Core.History;
 using NzbDrone.Core.MediaFiles;
+using NzbDrone.Core.MediaFiles.MediaInfo;
 using NzbDrone.Core.Movies;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.Model;
@@ -119,10 +120,12 @@ namespace NzbDrone.Core.CustomFormats
 
         public List<CustomFormat> ParseCustomFormat(LocalMovie localMovie)
         {
+            var releaseTitle = localMovie.SceneName.IsNotNullOrWhiteSpace() ? localMovie.SceneName : Path.GetFileName(localMovie.Path);
+
             var movieInfo = new ParsedMovieInfo
             {
                 MovieTitles = new List<string> { localMovie.Movie.Title },
-                SimpleReleaseTitle = localMovie.SceneName.IsNotNullOrWhiteSpace() ? localMovie.SceneName.SimplifyReleaseTitle() : Path.GetFileName(localMovie.Path).SimplifyReleaseTitle(),
+                SimpleReleaseTitle = VerifyReleaseTitle(releaseTitle, localMovie.MediaInfo, localMovie.ReleaseGroup).SimplifyReleaseTitle(),
                 ReleaseTitle = localMovie.SceneName,
                 Year = localMovie.Movie.Year,
                 Quality = localMovie.Quality,
@@ -138,7 +141,7 @@ namespace NzbDrone.Core.CustomFormats
                 Size = localMovie.Size,
                 Languages = localMovie.Languages,
                 IndexerFlags = localMovie.IndexerFlags,
-                Filename = Path.GetFileName(localMovie.Path)
+                Filename = VerifyReleaseTitle(Path.GetFileName(localMovie.Path), localMovie.MediaInfo, localMovie.ReleaseGroup)
             };
 
             return ParseCustomFormat(input);
@@ -195,7 +198,7 @@ namespace NzbDrone.Core.CustomFormats
             var movieInfo = new ParsedMovieInfo
             {
                 MovieTitles = new List<string> { movie.Title },
-                SimpleReleaseTitle = releaseTitle.SimplifyReleaseTitle(),
+                SimpleReleaseTitle = VerifyReleaseTitle(releaseTitle, movieFile.MediaInfo, movieFile.ReleaseGroup).SimplifyReleaseTitle(),
                 Year = movie.Year,
                 Quality = movieFile.Quality,
                 Languages = movieFile.Languages,
@@ -210,10 +213,22 @@ namespace NzbDrone.Core.CustomFormats
                 Size = movieFile.Size,
                 Languages = movieFile.Languages,
                 IndexerFlags = movieFile.IndexerFlags,
-                Filename = Path.GetFileName(movieFile.RelativePath)
+                Filename = VerifyReleaseTitle(Path.GetFileName(movieFile.RelativePath), movieFile.MediaInfo, movieFile.ReleaseGroup)
             };
 
             return ParseCustomFormat(input, allCustomFormats);
+        }
+
+        private string VerifyReleaseTitle(string releaseTitle, MediaInfoModel mediaInfo, string releaseGroup)
+        {
+            var verifiedTitle = VerifiedReleaseTitleBuilder.Build(releaseTitle, mediaInfo, releaseGroup);
+
+            if (verifiedTitle != releaseTitle)
+            {
+                _logger.Trace("Using media info verified release title: {0} -> {1}", releaseTitle, verifiedTitle);
+            }
+
+            return verifiedTitle;
         }
     }
 }
