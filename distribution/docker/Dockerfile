@@ -21,6 +21,9 @@ RUN apk add --no-cache \
 
 COPY ${TARGETARCH}/Radarr /app/bin
 
+# Fail the build if the bundled ffprobe cannot run on this image
+RUN /app/bin/ffprobe -version > /dev/null
+
 # Updates are handled by pulling a new image, not by Radarr itself
 RUN printf 'UpdateMethod=docker\nPackageVersion=%s\nPackageAuthor=magusbear\n' "$VERSION" > /app/package_info
 

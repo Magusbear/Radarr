@@ -88,6 +88,14 @@ jobs:
             ./build.sh --packages -r "$rid" -f "$FRAMEWORK"
             mkdir -p "_docker/$arch"
             mv "_artifacts/$rid/$FRAMEWORK/Radarr" "_docker/$arch/Radarr"
+
+            # Servarr.FFprobe has no musl runtimes; its linux binaries are statically linked and run on Alpine
+            ffprobe=$(find ~/.nuget/packages/servarr.ffprobe -path "*/runtimes/linux-${rid#linux-musl-}/native/*/ffprobe" | sort -V | tail -1)
+            if [ -z "$ffprobe" ]; then
+              echo "::error::No ffprobe found for $rid"
+              exit 1
+            fi
+            cp "$ffprobe" "_docker/$arch/Radarr/ffprobe"
           done
           # Same as the upstream pipeline: published binaries lose their executable bit
           find _docker -type f \( -name ffprobe -o -name Radarr -o -name Radarr.Update \) -exec chmod a+x {} +
