@@ -158,12 +158,11 @@ namespace NzbDrone.Core.Download
                 return;
             }
 
-            // Downloads often contain a sample next to the movie, so look for an interpolated movie in all results
-            var interpolatedResult = importResults.FirstOrDefault(r => r.Result == ImportResultType.Rejected &&
-                                                                       r.ImportDecision.Rejections.Any(j => j.Reason == ImportRejectionReason.InterpolatedVideo));
+            // Downloads often contain a sample next to the movie, so look for a bad movie file in all results
+            var failingResult = importResults.FirstOrDefault(r => r.Result == ImportResultType.Rejected && FailingImportRejections.Find(r) != null);
 
-            if (interpolatedResult != null && importResults.None(r => r.Result == ImportResultType.Imported) &&
-                _rejectedImportService.Process(trackedDownload, interpolatedResult))
+            if (failingResult != null && importResults.None(r => r.Result == ImportResultType.Imported) &&
+                _rejectedImportService.Process(trackedDownload, failingResult))
             {
                 return;
             }

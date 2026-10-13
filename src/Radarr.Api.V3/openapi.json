@@ -10626,6 +10626,9 @@
           "maximumVideoFrameRate": {
             "type": "integer",
             "format": "int32"
+          },
+          "rejectBurnedInChineseSubtitles": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false

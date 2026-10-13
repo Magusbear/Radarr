@@ -39,6 +39,17 @@ Some uploads are frame-interpolated (e.g. a 24 fps movie converted to 60 fps) wi
 * Files already in the library are never removed. A rejected file can still be imported through *Manual Import*.
 * **Settings:** *Settings → Media Management → Reject Interpolated Video* (on by default) and *Maximum Frame Rate*. Raise the maximum if you want genuine high frame rate releases (e.g. 48 fps HFR).
 
+#### Reject burned-in Chinese subtitles
+
+Some uploads have Chinese subtitles burned into the picture without saying so in the release name. These cannot be seen in the file's metadata, so this fork reads the subtitle area with OCR when a download is imported:
+
+* 12 frames spread between 10% and 90% of the movie are extracted with ffmpeg. The bottom part of each frame is converted to black text on white and read with tesseract (simplified and traditional Chinese).
+* If 3 or more frames contain Chinese text, the file is not imported and the download is marked as **failed**: the release is blocklisted with the reason (e.g. `Burned-in Chinese subtitles detected (Chinese text in 7 of 12 sampled frames)`) and a new search is started if *Redownload Failed* is enabled.
+* Every checked download logs the result, e.g. `Burned-in subtitle check for <file>: Chinese text in 0 of 12 sampled frames`.
+* Not applied to movies whose original language is Chinese, Japanese or Korean, to files already in the library, to samples, or to manual imports of folders. Takes roughly 10–30 seconds per download.
+* **Setting:** *Settings → Media Management → Reject Burned-in Chinese Subtitles* (on by default).
+* Requires `ffmpeg` and `tesseract` with Chinese language data, which are included in the Docker image. Without them the check is skipped and a warning is logged.
+
 #### Docker image
 
 A multi-arch (amd64, arm64) Alpine image is published to `ghcr.io/magusbear/radarr` by the manually triggered *Publish Docker image* GitHub Action (Actions → Publish Docker image → Run workflow).

@@ -432,6 +432,22 @@ function MediaManagement() {
                 </FormGroup>
               ) : null}
 
+              <FormGroup size={sizes.MEDIUM}>
+                <FormLabel>
+                  {translate('RejectBurnedInChineseSubtitles')}
+                </FormLabel>
+
+                <FormInputGroup
+                  type={inputTypes.CHECK}
+                  name="rejectBurnedInChineseSubtitles"
+                  helpText={translate(
+                    'RejectBurnedInChineseSubtitlesHelpText'
+                  )}
+                  onChange={handleInputChange}
+                  {...settings.rejectBurnedInChineseSubtitles}
+                />
+              </FormGroup>
+
               <FormGroup
                 advancedSettings={showAdvancedSettings}
                 isAdvanced={true}

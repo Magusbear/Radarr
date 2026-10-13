@@ -33,6 +33,7 @@ namespace Radarr.Api.V3.Config
         public bool VerifyCustomFormatsWithMediaInfo { get; set; }
         public bool RejectInterpolatedVideo { get; set; }
         public int MaximumVideoFrameRate { get; set; }
+        public bool RejectBurnedInChineseSubtitles { get; set; }
     }
 
     public static class MediaManagementConfigResourceMapper
@@ -65,7 +66,8 @@ namespace Radarr.Api.V3.Config
                 EnableMediaInfo = model.EnableMediaInfo,
                 VerifyCustomFormatsWithMediaInfo = model.VerifyCustomFormatsWithMediaInfo,
                 RejectInterpolatedVideo = model.RejectInterpolatedVideo,
-                MaximumVideoFrameRate = model.MaximumVideoFrameRate
+                MaximumVideoFrameRate = model.MaximumVideoFrameRate,
+                RejectBurnedInChineseSubtitles = model.RejectBurnedInChineseSubtitles
             };
         }
     }

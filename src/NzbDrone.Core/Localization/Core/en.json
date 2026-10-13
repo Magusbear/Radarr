@@ -1590,6 +1590,8 @@
   "RefreshMovie": "Refresh movie",
   "RegularExpressionsCanBeTested": "Regular expressions can be tested [here]({url}).",
   "RegularExpressionsTutorialLink": "More details on regular expressions can be found [here]({url}).",
+  "RejectBurnedInChineseSubtitles": "Reject Burned-in Chinese Subtitles",
+  "RejectBurnedInChineseSubtitlesHelpText": "Read the subtitle area of sample frames with OCR when importing a download and reject it if Chinese subtitles are burned into the video. The download is marked as failed. Not applied to Chinese, Japanese and Korean movies. Requires ffmpeg and tesseract (included in the Docker image)",
   "RejectInterpolatedVideo": "Reject Interpolated Video",
   "RejectInterpolatedVideoHelpText": "Reject downloads with a frame rate above the maximum (e.g. 60 fps uploads of 24 fps movies). The download is marked as failed, which blocklists the release and searches again if Redownload Failed is enabled",
   "RejectionCount": "Rejection Count",

@@ -8,11 +8,15 @@ ARG VERSION=dev
 
 RUN apk add --no-cache \
         ca-certificates \
+        ffmpeg \
         icu-libs \
         libgcc \
         libintl \
         libstdc++ \
         sqlite-libs \
+        tesseract-ocr \
+        tesseract-ocr-data-chi_sim \
+        tesseract-ocr-data-chi_tra \
         tzdata \
     && addgroup -g 1000 radarr \
     && adduser -D -H -u 1000 -G radarr radarr \
@@ -21,8 +25,10 @@ RUN apk add --no-cache \
 
 COPY ${TARGETARCH}/Radarr /app/bin
 
-# Fail the build if the bundled ffprobe cannot run on this image
-RUN /app/bin/ffprobe -version > /dev/null
+# Fail the build if the bundled ffprobe or the tools for burned-in subtitle detection cannot run on this image
+RUN /app/bin/ffprobe -version > /dev/null \
+    && ffmpeg -hide_banner -version > /dev/null \
+    && tesseract --list-langs | grep -q chi_sim
 
 # Updates are handled by pulling a new image, not by Radarr itself
 RUN printf 'UpdateMethod=docker\nPackageVersion=%s\nPackageAuthor=magusbear\n' "$VERSION" > /app/package_info

@@ -42,6 +42,17 @@ namespace NzbDrone.Core.Test.Download
         }
 
         [Test]
+        public void should_fail_download_with_burned_in_chinese_subtitles_with_reason()
+        {
+            var result = GivenRejectedResult(ImportRejectionReason.BurnedInChineseSubtitles, "Burned-in Chinese subtitles detected (Chinese text in 7 of 12 sampled frames)");
+
+            Subject.Process(_trackedDownload, result).Should().BeTrue();
+
+            _trackedDownload.State.Should().Be(TrackedDownloadState.FailedPending);
+            _trackedDownload.FailureMessage.Should().Contain("Burned-in Chinese subtitles");
+        }
+
+        [Test]
         public void should_only_warn_for_other_rejections_without_indexer_settings()
         {
             var result = GivenRejectedResult(ImportRejectionReason.Sample, "Sample");

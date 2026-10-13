@@ -39,6 +39,7 @@ namespace NzbDrone.Core.Configuration
         bool VerifyCustomFormatsWithMediaInfo { get; set; }
         bool RejectInterpolatedVideo { get; set; }
         int MaximumVideoFrameRate { get; set; }
+        bool RejectBurnedInChineseSubtitles { get; set; }
         bool UseScriptImport { get; set; }
         string ScriptImportPath { get; set; }
         bool ImportExtraFiles { get; set; }

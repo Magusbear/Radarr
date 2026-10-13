@@ -21,4 +21,5 @@ export default interface MediaManagement {
   verifyCustomFormatsWithMediaInfo: boolean;
   rejectInterpolatedVideo: boolean;
   maximumVideoFrameRate: number;
+  rejectBurnedInChineseSubtitles: boolean;
 }

@@ -11,6 +11,21 @@ public interface IRejectedImportService
     bool Process(TrackedDownload trackedDownload, ImportResult importResult);
 }
 
+public static class FailingImportRejections
+{
+    // Rejections that mean the release itself is bad, so the download is failed (blocklisted and searched again)
+    public static readonly ImportRejectionReason[] Reasons =
+    {
+        ImportRejectionReason.InterpolatedVideo,
+        ImportRejectionReason.BurnedInChineseSubtitles
+    };
+
+    public static ImportRejection Find(ImportResult importResult)
+    {
+        return importResult.ImportDecision.Rejections.FirstOrDefault(r => Reasons.Contains(r.Reason));
+    }
+}
+
 public class RejectedImportService : IRejectedImportService
 {
     private readonly ICachedIndexerSettingsProvider _cachedIndexerSettingsProvider;
@@ -29,13 +44,13 @@ public class RejectedImportService : IRejectedImportService
             return false;
         }
 
-        var interpolatedRejection = importResult.ImportDecision.Rejections.FirstOrDefault(r => r.Reason == ImportRejectionReason.InterpolatedVideo);
+        var failingRejection = FailingImportRejections.Find(importResult);
 
-        if (interpolatedRejection != null)
+        if (failingRejection != null)
         {
-            _logger.Info("Download '{0}' is interpolated video, marking as failed", trackedDownload.DownloadItem.Title);
-            trackedDownload.Warn(new TrackedDownloadStatusMessage(trackedDownload.DownloadItem.Title, interpolatedRejection.Message));
-            trackedDownload.Fail(interpolatedRejection.Message);
+            _logger.Info("Download '{0}' rejected ({1}), marking as failed", trackedDownload.DownloadItem.Title, failingRejection.Message);
+            trackedDownload.Warn(new TrackedDownloadStatusMessage(trackedDownload.DownloadItem.Title, failingRejection.Message));
+            trackedDownload.Fail(failingRejection.Message);
 
             return true;
         }

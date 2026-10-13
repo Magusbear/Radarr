@@ -288,6 +288,13 @@ namespace NzbDrone.Core.Configuration
             set { SetValue("MaximumVideoFrameRate", value); }
         }
 
+        public bool RejectBurnedInChineseSubtitles
+        {
+            get { return GetValueBoolean("RejectBurnedInChineseSubtitles", true); }
+
+            set { SetValue("RejectBurnedInChineseSubtitles", value); }
+        }
+
         public bool UseScriptImport
         {
             get { return GetValueBoolean("UseScriptImport", false); }
