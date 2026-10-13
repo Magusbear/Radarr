@@ -89,6 +89,8 @@ jobs:
             mkdir -p "_docker/$arch"
             mv "_artifacts/$rid/$FRAMEWORK/Radarr" "_docker/$arch/Radarr"
           done
+          # Same as the upstream pipeline: published binaries lose their executable bit
+          find _docker -type f \( -name ffprobe -o -name Radarr -o -name Radarr.Update \) -exec chmod a+x {} +
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v4
