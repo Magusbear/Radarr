@@ -1,0 +1,134 @@
+name: Publish Docker image
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version (e.g. 6.0.4.10291). Empty = 10.0.0.<run number>"
+        required: false
+        default: ""
+      platforms:
+        description: "Target platforms"
+        type: choice
+        default: "linux/amd64,linux/arm64"
+        options:
+          - "linux/amd64,linux/arm64"
+          - "linux/amd64"
+          - "linux/arm64"
+      tag_latest:
+        description: "Also tag the image as latest"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: docker-publish
+  cancel-in-progress: false
+
+env:
+  FRAMEWORK: net8.0
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: yarn
+
+      - name: Determine version and image name
+        id: vars
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          version="${INPUT_VERSION:-10.0.0.${GITHUB_RUN_NUMBER}}"
+          if ! [[ "$version" =~ ^[0-9]+(\.[0-9]+){1,3}$ ]]; then
+            echo "::error::Invalid version '$version'"
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "image=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/radarr" >> "$GITHUB_OUTPUT"
+
+      - name: Build frontend
+        run: |
+          yarn install --frozen-lockfile --network-timeout 120000
+          yarn run build --env production
+          # build.sh --backend wipes _output, so keep the UI aside
+          mv _output/UI _ui
+
+      - name: Build and package backend
+        env:
+          RADARRVERSION: ${{ steps.vars.outputs.version }}
+          BUILD_SOURCEBRANCHNAME: ${{ github.ref_name }}
+          PLATFORMS: ${{ inputs.platforms }}
+        run: |
+          mkdir -p _docker
+          for platform in ${PLATFORMS//,/ }; do
+            arch="${platform#linux/}"
+            case "$arch" in
+              amd64) rid=linux-musl-x64 ;;
+              arm64) rid=linux-musl-arm64 ;;
+              *) echo "::error::Unsupported platform $platform"; exit 1 ;;
+            esac
+            ./build.sh --backend -r "$rid" -f "$FRAMEWORK"
+            cp -r _ui _output/UI
+            ./build.sh --packages -r "$rid" -f "$FRAMEWORK"
+            mkdir -p "_docker/$arch"
+            mv "_artifacts/$rid/$FRAMEWORK/Radarr" "_docker/$arch/Radarr"
+          done
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ steps.vars.outputs.image }}
+          tags: |
+            type=raw,value=${{ steps.vars.outputs.version }}
+            type=sha,prefix=sha-
+            type=raw,value=latest,enable=${{ inputs.tag_latest }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: _docker
+          file: distribution/docker/Dockerfile
+          platforms: ${{ inputs.platforms }}
+          build-args: VERSION=${{ steps.vars.outputs.version }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Summary
+        run: |
+          {
+            echo "### Published ${{ steps.vars.outputs.image }}"
+            echo '```'
+            echo "${{ steps.meta.outputs.tags }}"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
