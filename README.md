@@ -29,6 +29,16 @@ Upstream Radarr scores custom formats only from the release name, so a release c
 * **Limitations:** Only applies once a file has been analyzed by ffprobe; release names are still used before download. Only the first audio track is checked. Tokens that are part of the movie title (before the year) are never changed.
 * **Troubleshooting:** With trace logging, `Using media info verified release title: <name> -> <verified name>` shows the rewritten name. Blocklisted releases show the reason `Custom format score dropped from X to Y after media info verification`.
 
+#### Reject interpolated video
+
+Some uploads are frame-interpolated (e.g. a 24 fps movie converted to 60 fps) without saying so in the release name. This fork checks the real frame rate with ffprobe when a download is imported:
+
+* Files above the maximum frame rate (default **30 fps**) are not imported. Regular movies (23.976, 24, 25 and 29.97 fps) are not affected.
+* The download is marked as **failed**, so Radarr's failed download handling takes over: the release is blocklisted with the reason (e.g. `Video is 59.94 fps, above the maximum of 30 fps (likely interpolated)`), removed from the download client if *Remove* is enabled for the client, and a new search is started if *Redownload Failed* is enabled.
+* Works for downloads that also contain a sample file.
+* Files already in the library are never removed. A rejected file can still be imported through *Manual Import*.
+* **Settings:** *Settings → Media Management → Reject Interpolated Video* (on by default) and *Maximum Frame Rate*. Raise the maximum if you want genuine high frame rate releases (e.g. 48 fps HFR).
+
 #### Docker image
 
 A multi-arch (amd64, arm64) Alpine image is published to `ghcr.io/magusbear/radarr` by the manually triggered *Publish Docker image* GitHub Action (Actions → Publish Docker image → Run workflow).

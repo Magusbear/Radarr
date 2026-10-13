@@ -126,6 +126,37 @@ namespace NzbDrone.Core.Test.Download
         }
 
         [Test]
+        public void should_fail_download_if_movie_is_interpolated_even_with_a_sample()
+        {
+            var interpolated = new ImportResult(
+                new ImportDecision(
+                    new LocalMovie { Path = @"C:\TestPath\Droned.1998.mkv" },
+                    new ImportRejection(ImportRejectionReason.InterpolatedVideo, "Video is 60 fps")),
+                "Video is 60 fps");
+
+            Mocker.GetMock<IDownloadedMovieImportService>()
+                .Setup(v => v.ProcessPath(It.IsAny<string>(), It.IsAny<ImportMode>(), It.IsAny<Movie>(), It.IsAny<DownloadClientItem>()))
+                .Returns(new List<ImportResult>
+                {
+                    new ImportResult(
+                        new ImportDecision(
+                            new LocalMovie { Path = @"C:\TestPath\Sample\Droned.1998.sample.mkv" },
+                            new ImportRejection(ImportRejectionReason.Sample, "Sample")),
+                        "Sample"),
+                    interpolated
+                });
+
+            Mocker.GetMock<IRejectedImportService>()
+                .Setup(s => s.Process(_trackedDownload, interpolated))
+                .Returns(true);
+
+            Subject.Import(_trackedDownload);
+
+            Mocker.GetMock<IRejectedImportService>()
+                .Verify(s => s.Process(_trackedDownload, interpolated), Times.Once());
+        }
+
+        [Test]
         public void should_not_mark_as_imported_if_no_movies_were_parsed()
         {
             Mocker.GetMock<IDownloadedMovieImportService>()

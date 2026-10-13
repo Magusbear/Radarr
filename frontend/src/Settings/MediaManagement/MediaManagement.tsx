@@ -404,6 +404,34 @@ function MediaManagement() {
                 />
               </FormGroup>
 
+              <FormGroup size={sizes.MEDIUM}>
+                <FormLabel>{translate('RejectInterpolatedVideo')}</FormLabel>
+
+                <FormInputGroup
+                  type={inputTypes.CHECK}
+                  name="rejectInterpolatedVideo"
+                  helpText={translate('RejectInterpolatedVideoHelpText')}
+                  onChange={handleInputChange}
+                  {...settings.rejectInterpolatedVideo}
+                />
+              </FormGroup>
+
+              {settings.rejectInterpolatedVideo.value ? (
+                <FormGroup size={sizes.MEDIUM}>
+                  <FormLabel>{translate('MaximumVideoFrameRate')}</FormLabel>
+
+                  <FormInputGroup
+                    type={inputTypes.NUMBER}
+                    unit="fps"
+                    min={1}
+                    name="maximumVideoFrameRate"
+                    helpText={translate('MaximumVideoFrameRateHelpText')}
+                    onChange={handleInputChange}
+                    {...settings.maximumVideoFrameRate}
+                  />
+                </FormGroup>
+              ) : null}
+
               <FormGroup
                 advancedSettings={showAdvancedSettings}
                 isAdvanced={true}

@@ -37,6 +37,8 @@ namespace NzbDrone.Core.Configuration
         bool CopyUsingHardlinks { get; set; }
         bool EnableMediaInfo { get; set; }
         bool VerifyCustomFormatsWithMediaInfo { get; set; }
+        bool RejectInterpolatedVideo { get; set; }
+        int MaximumVideoFrameRate { get; set; }
         bool UseScriptImport { get; set; }
         string ScriptImportPath { get; set; }
         bool ImportExtraFiles { get; set; }

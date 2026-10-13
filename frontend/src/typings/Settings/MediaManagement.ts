@@ -19,4 +19,6 @@ export default interface MediaManagement {
   extraFileExtensions: string;
   enableMediaInfo: boolean;
   verifyCustomFormatsWithMediaInfo: boolean;
+  rejectInterpolatedVideo: boolean;
+  maximumVideoFrameRate: number;
 }

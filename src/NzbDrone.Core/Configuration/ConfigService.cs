@@ -274,6 +274,20 @@ namespace NzbDrone.Core.Configuration
             set { SetValue("VerifyCustomFormatsWithMediaInfo", value); }
         }
 
+        public bool RejectInterpolatedVideo
+        {
+            get { return GetValueBoolean("RejectInterpolatedVideo", true); }
+
+            set { SetValue("RejectInterpolatedVideo", value); }
+        }
+
+        public int MaximumVideoFrameRate
+        {
+            get { return GetValueInt("MaximumVideoFrameRate", 30); }
+
+            set { SetValue("MaximumVideoFrameRate", value); }
+        }
+
         public bool UseScriptImport
         {
             get { return GetValueBoolean("UseScriptImport", false); }

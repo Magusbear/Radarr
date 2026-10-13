@@ -10619,6 +10619,13 @@
           },
           "verifyCustomFormatsWithMediaInfo": {
             "type": "boolean"
+          },
+          "rejectInterpolatedVideo": {
+            "type": "boolean"
+          },
+          "maximumVideoFrameRate": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false

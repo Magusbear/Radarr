@@ -158,6 +158,16 @@ namespace NzbDrone.Core.Download
                 return;
             }
 
+            // Downloads often contain a sample next to the movie, so look for an interpolated movie in all results
+            var interpolatedResult = importResults.FirstOrDefault(r => r.Result == ImportResultType.Rejected &&
+                                                                       r.ImportDecision.Rejections.Any(j => j.Reason == ImportRejectionReason.InterpolatedVideo));
+
+            if (interpolatedResult != null && importResults.None(r => r.Result == ImportResultType.Imported) &&
+                _rejectedImportService.Process(trackedDownload, interpolatedResult))
+            {
+                return;
+            }
+
             if (importResults.Count == 1)
             {
                 var firstResult = importResults.First();

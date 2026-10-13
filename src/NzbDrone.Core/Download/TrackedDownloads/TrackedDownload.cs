@@ -13,6 +13,7 @@ namespace NzbDrone.Core.Download.TrackedDownloads
         public TrackedDownloadStatus Status { get; private set; }
         public RemoteMovie RemoteMovie { get; set; }
         public TrackedDownloadStatusMessage[] StatusMessages { get; private set; }
+        public string FailureMessage { get; private set; }
         public DownloadProtocol Protocol { get; set; }
         public string Indexer { get; set; }
         public DateTime? Added { get; set; }
@@ -36,8 +37,9 @@ namespace NzbDrone.Core.Download.TrackedDownloads
             StatusMessages = statusMessages;
         }
 
-        public void Fail()
+        public void Fail(string failureMessage = null)
         {
+            FailureMessage = failureMessage;
             Status = TrackedDownloadStatus.Error;
             State = TrackedDownloadState.FailedPending;
 

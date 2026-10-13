@@ -31,6 +31,8 @@ namespace Radarr.Api.V3.Config
         public string ExtraFileExtensions { get; set; }
         public bool EnableMediaInfo { get; set; }
         public bool VerifyCustomFormatsWithMediaInfo { get; set; }
+        public bool RejectInterpolatedVideo { get; set; }
+        public int MaximumVideoFrameRate { get; set; }
     }
 
     public static class MediaManagementConfigResourceMapper
@@ -61,7 +63,9 @@ namespace Radarr.Api.V3.Config
                 ImportExtraFiles = model.ImportExtraFiles,
                 ExtraFileExtensions = model.ExtraFileExtensions,
                 EnableMediaInfo = model.EnableMediaInfo,
-                VerifyCustomFormatsWithMediaInfo = model.VerifyCustomFormatsWithMediaInfo
+                VerifyCustomFormatsWithMediaInfo = model.VerifyCustomFormatsWithMediaInfo,
+                RejectInterpolatedVideo = model.RejectInterpolatedVideo,
+                MaximumVideoFrameRate = model.MaximumVideoFrameRate
             };
         }
     }

@@ -69,6 +69,17 @@ namespace NzbDrone.Core.Test.Download.FailedDownloadServiceTests
         }
 
         [Test]
+        public void should_use_failure_message_of_rejected_import()
+        {
+            _trackedDownload.Fail("Video is 60 fps, above the maximum of 30 fps (likely interpolated)");
+
+            Subject.ProcessFailed(_trackedDownload);
+
+            Mocker.GetMock<IEventAggregator>()
+                  .Verify(v => v.PublishEvent(It.Is<DownloadFailedEvent>(c => c.Message.Contains("60 fps"))), Times.Once());
+        }
+
+        [Test]
         public void should_include_tracked_download_in_message()
         {
             _trackedDownload.DownloadItem.Status = DownloadItemStatus.Failed;

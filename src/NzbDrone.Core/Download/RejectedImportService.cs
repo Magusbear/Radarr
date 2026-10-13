@@ -29,6 +29,17 @@ public class RejectedImportService : IRejectedImportService
             return false;
         }
 
+        var interpolatedRejection = importResult.ImportDecision.Rejections.FirstOrDefault(r => r.Reason == ImportRejectionReason.InterpolatedVideo);
+
+        if (interpolatedRejection != null)
+        {
+            _logger.Info("Download '{0}' is interpolated video, marking as failed", trackedDownload.DownloadItem.Title);
+            trackedDownload.Warn(new TrackedDownloadStatusMessage(trackedDownload.DownloadItem.Title, interpolatedRejection.Message));
+            trackedDownload.Fail(interpolatedRejection.Message);
+
+            return true;
+        }
+
         var indexerSettings = _cachedIndexerSettingsProvider.GetSettings(trackedDownload.RemoteMovie.Release.IndexerId);
         var rejectionReason = importResult.ImportDecision.Rejections.FirstOrDefault()?.Reason;
 

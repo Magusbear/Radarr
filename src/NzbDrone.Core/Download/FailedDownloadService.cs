@@ -102,6 +102,10 @@ namespace NzbDrone.Core.Download
             {
                 failure = trackedDownload.DownloadItem.Message;
             }
+            else if (trackedDownload.FailureMessage.IsNotNullOrWhiteSpace())
+            {
+                failure = trackedDownload.FailureMessage;
+            }
 
             trackedDownload.State = TrackedDownloadState.Failed;
             PublishDownloadFailedEvent(grabbedItems.First(), failure, trackedDownload);
