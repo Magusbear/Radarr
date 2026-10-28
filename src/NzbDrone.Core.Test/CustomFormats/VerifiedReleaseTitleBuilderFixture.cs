@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.CustomFormats;
@@ -21,9 +22,10 @@ namespace NzbDrone.Core.Test.CustomFormats
                 VideoFormat = "hevc",
                 VideoBitDepth = 10,
                 VideoHdrFormat = HdrFormat.Hdr10,
-                AudioFormat = "eac3",
-                AudioChannelPositions = "5.1(side)",
-                AudioChannels = 6
+                AudioStreams = new List<MediaInfoAudioStreamModel>
+                {
+                    new MediaInfoAudioStreamModel { Format = "eac3", ChannelPositions = "5.1(side)", Channels = 6 }
+                }
             };
 
             _dvTrueHdAtmos = new MediaInfoModel
@@ -32,9 +34,10 @@ namespace NzbDrone.Core.Test.CustomFormats
                 VideoFormat = "hevc",
                 VideoBitDepth = 10,
                 VideoHdrFormat = HdrFormat.DolbyVisionHdr10,
-                AudioFormat = "truehd",
-                AudioCodecID = "thd+",
-                AudioChannels = 8
+                AudioStreams = new List<MediaInfoAudioStreamModel>
+                {
+                    new MediaInfoAudioStreamModel { Format = "truehd", CodecId = "thd+", Channels = 8 }
+                }
             };
         }
 

@@ -125,7 +125,7 @@ namespace NzbDrone.Core.CustomFormats
                 tokens.Add($"{mediaInfo.VideoBitDepth}bit");
             }
 
-            var audioCodec = MediaInfoFormatter.FormatAudioCodec(mediaInfo, sceneName);
+            var audioCodec = mediaInfo.PrimaryAudioStream == null ? null : MediaInfoFormatter.FormatAudioCodec(mediaInfo.PrimaryAudioStream, sceneName);
 
             if (audioCodec.IsNotNullOrWhiteSpace())
             {
@@ -134,25 +134,25 @@ namespace NzbDrone.Core.CustomFormats
                 tokens.AddRange(GetAudioCodecTokens(audioCodec));
             }
 
-            if (mediaInfo.AudioChannels > 0)
+            if (mediaInfo.PrimaryAudioStream?.Channels > 0)
             {
                 strippedCategories.Add(AudioChannelTokens);
-                tokens.Add(FormatAudioChannels(mediaInfo));
+                tokens.Add(FormatAudioChannels(mediaInfo.PrimaryAudioStream));
             }
 
             return tokens;
         }
 
-        private static string FormatAudioChannels(MediaInfoModel mediaInfo)
+        private static string FormatAudioChannels(MediaInfoAudioStreamModel audioStream)
         {
-            var channels = mediaInfo.AudioChannelPositions.IsNotNullOrWhiteSpace()
-                ? MediaInfoFormatter.FormatAudioChannels(mediaInfo)
-                : mediaInfo.AudioChannels switch
+            var channels = audioStream.ChannelPositions.IsNotNullOrWhiteSpace()
+                ? MediaInfoFormatter.FormatAudioChannels(audioStream)
+                : audioStream.Channels switch
                 {
                     6 => 5.1m,
                     7 => 6.1m,
                     8 => 7.1m,
-                    _ => mediaInfo.AudioChannels
+                    _ => audioStream.Channels
                 };
 
             return channels.ToString("0.0", CultureInfo.InvariantCulture);
