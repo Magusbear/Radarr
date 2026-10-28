@@ -73,7 +73,7 @@ namespace NzbDrone.Core.Test.CustomFormats
         private void GivenImportedFileFormats(params CustomFormat[] formats)
         {
             Mocker.GetMock<ICustomFormatCalculationService>()
-                .Setup(s => s.ParseCustomFormat(_localMovie))
+                .Setup(s => s.ParseCustomFormat(_localMovie, It.IsAny<string>()))
                 .Returns(new List<CustomFormat>(formats));
         }
 

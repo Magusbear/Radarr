@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using NLog;
 using NzbDrone.Common.Extensions;
@@ -58,7 +59,7 @@ namespace NzbDrone.Core.CustomFormats
                 return;
             }
 
-            var verifiedScore = movie.QualityProfile.CalculateCustomFormatScore(_formatCalculator.ParseCustomFormat(localMovie));
+            var verifiedScore = movie.QualityProfile.CalculateCustomFormatScore(_formatCalculator.ParseCustomFormat(localMovie, Path.GetFileName(localMovie.Path)));
 
             if (verifiedScore >= grabbedScore)
             {
