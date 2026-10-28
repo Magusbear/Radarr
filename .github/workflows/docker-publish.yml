@@ -29,7 +29,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  FRAMEWORK: net8.0
+  FRAMEWORK: net10.0
 
 jobs:
   publish:
@@ -46,7 +46,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v7
         with:
-          node-version: "20"
+          node-version: "24"
           cache: yarn
 
       - name: Determine version and image name
@@ -89,8 +89,8 @@ jobs:
             mkdir -p "_docker/$arch"
             mv "_artifacts/$rid/$FRAMEWORK/Radarr" "_docker/$arch/Radarr"
 
-            # Servarr.FFprobe has no musl runtimes; its linux binaries are statically linked and run on Alpine
-            ffprobe=$(find ~/.nuget/packages/servarr.ffprobe -path "*/runtimes/linux-${rid#linux-musl-}/native/*/ffprobe" | sort -V | tail -1)
+            # Openur.FFprobeStatic ships static musl binaries; make sure the one for this platform ends up next to Radarr
+            ffprobe=$(find ~/.nuget/packages/openur.ffprobestatic -path "*/runtimes/${rid}/native/ffprobe" | sort -V | tail -1)
             if [ -z "$ffprobe" ]; then
               echo "::error::No ffprobe found for $rid"
               exit 1
